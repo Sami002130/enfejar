@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محاسبه ضریب هش</title>
+    <style>
+        body {
+            background: linear-gradient(to right, #00c6ff, #0072ff); /* پس زمینه زیبا با گرادیانت آبی */
+            font-family: Arial, sans-serif;
+            text-align: center;
+            direction: rtl;
+            color: #fff;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background-color: #2f2f2f; /* پس زمینه اصلی به رنگ مشکی */
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            max-width: 400px;
+            width: 100%;
+            margin: 20px;
+        }
+        h1 {
+            color: #00c6ff; /* رنگ آبی روشن برای عنوان */
+        }
+        input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            border: 1px solid #00c6ff; /* حاشیه آبی */
+            border-radius: 5px;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #0072ff; /* رنگ آبی تیره برای دکمه */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3; /* رنگ تیره‌تر برای هاور */
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            color: #fff;
+        }
+        .safe {
+            color: #00ff00; /* رنگ سبز برای ایمن */
+        }
+        .risky {
+            color: #ff6600; /* رنگ نارنجی برای ریسک */
+        }
+        .dangerous {
+            color: #ff0000; /* رنگ قرمز برای خطرناک */
+        }
+        .bet {
+            color: #00bfff; /* رنگ آبی روشن برای بت نکن */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>محاسبه ضریب هش</h1>
+        <input type="text" id="hashInput" placeholder="هش خود را وارد کنید">
+        <button onclick="calculateCoefficient()">محاسبه</button>
+        <div class="result" id="result"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script>
+        const hashTable = {
+            "b3335f6806aa092fe738bcf1b4652c8b": 1.57,
+            "e99a18c428cb38d5f260853678922e03": 2.34,
+            "ab56b4d92b40713acc5af89985d4b786": 3.21,
+            "4b43b0aee35624cd95b910189b3dc231": 4.19,
+            "e4da3b7fbbce2345d7772b0674a318d5": 5.00,
+            "1679091c5a880faf6fb5e6087eb1b2dc": 0.11,
+            "8f14e45fceea167a5a36dedd4bea2543": 1.85,
+            "c9f0f895fb98ab9159f51fd0297e236d": 2.65,
+            "45c48cce2e2d7fbdea1afc51c7c6ad26": 3.31,
+            "d3d9446802a44259755d38e6d163e820": 4.47,
+            "6512bd43d9caa6e02c990b0a82652dca": 5.00,
+            "c20ad4d76fe97759aa27a0c99bff6710": 1.29,
+            "c51ce410c124a10e0db5e4b97fc2af39": 2.58,
+            "aab3238922bcc25a6f606eb525ffdc56": 3.49,
+            "9bf31c7ff062936a96d3c8bd1f8f2ff3": 4.67,
+            "c74d97b01eae257e44aa9d5bade97baf": 0.44,
+            "70efdf2ec9b086079795c442636b55fb": 1.39,
+            "6f4922f45568161a8cdf4ad2299f6d23": 2.24,
+            "1f0e3dad99908345f7439f8ffabdffc4": 3.11,
+            "98f13708210194c475687be6106a3b84": 4.00,
+            "3c59dc048e8850243be8079a5c74d079": 0.29,
+            "b6d767d2f8ed5d21a44b0e5886680cb9": 1.57,
+            "37693cfc748049e45d87b8c7d8b9aacd": 2.84,
+            "1ff1de774005f8da13f42943881c655f": 3.62,
+            "8e296a067a37563370ded05f5a3bf3ec": 4.48,
+            "4e732ced3463d06de0ca9a15b6153677": 0.67,
+            "02e74f10e0327ad868d138f2b4fdd6f0": 1.57,
+            "33e75ff09dd601bbe69f351039152189": 2.49,
+            "6ea9ab1baa0efb9e19094440c317e21b": 3.33,
+            "34173cb38f07f89ddbebc2ac9128303f": 4.43,
+            "c16a5320fa475530d9583c34fd356ef5": 0.25,
+            "6364d3f0f495b6ab9dcf8d3b5c6e0b01": 1.76,
+            "182be0c5cdcd5072bb1864cdee4d3d6e": 2.21,
+            "e369853df766fa44e1ed0ff613f563bd": 3.65,
+            "1c383cd30b7c298ab50293adfecb7b18": 4.46,
+            "af8dc2fd4c301ce5e9f0083a3cb0abfd": 0.58,
+            "c4ca4238a0b923820dcc509a6f75849b": 1.49,
+            "c81e728d9d4c2f636f067f89cc14862c": 2.33,
+            "eccbc87e4b5ce2fe28308fd9f2a7baf3": 3.27,
+            "a87ff679a2f3e71d9181a67b7542122c": 4.15,
+            "e4da3b7fbbce2345d7772b0674a318d5": 5.00,
+            "1679091c5a880faf6fb5e6087eb1b2dc": 0.11,
+            "8f14e45fceea167a5a36dedd4bea2543": 1.85,
+            "c9f0f895fb98ab9159f51fd0297e236d": 2.65,
+            "45c48cce2e2d7fbdea1afc51c7c6ad26": 3.31,
+            "d3d9446802a44259755d38e6d163e820": 4.47,
+            "6512bd43d9caa6e02c990b0a82652dca": 5.00
+        };
+
+        function calculateCoefficient() {
+            const hashInput = document.getElementById("hashInput").value;
+            const resultElement = document.getElementById("result");
+
+            let coefficient;
+
+            if (hashTable[hashInput]) {
+                coefficient = hashTable[hashInput];
+            } else {
+                coefficient = generateCoefficient(hashInput);
+            }
+
+            let status;
+            let statusClass;
+            if (coefficient < 1) {
+                status = "بت نکن";
+                statusClass = "bet";
+            } else if (coefficient >= 1 && coefficient < 2) {
+                status = "ایمن";
+                statusClass = "safe";
+            } else if (coefficient >= 2 && coefficient < 3) {
+                status = "ریسکی";
+                statusClass = "risky";
+            } else if (coefficient >= 3 && coefficient < 4) {
+                status = "اصلا ریسک نکن";
+                statusClass = "dangerous";
+            } else {
+                status = "خیلی ریسکیه";
+                statusClass = "dangerous";
+            }
+
+            resultElement.innerHTML = `ضریب: <strong>${coefficient.toFixed(2)}</strong> - وضعیت: <span class="${statusClass}">${status}</span>`;
+        }
+
+        function generateCoefficient(hash) {
+            let sum = 0;
+            for (let i = 0; i < hash.length; i++) {
+                sum += hash.charCodeAt(i);
+            }
+            const coefficient = (sum % 500) / 100.0; // محاسبه ضریب بین 0 تا 5
+            return coefficient;
+        }
+    </script>
+</body>
+</html>
